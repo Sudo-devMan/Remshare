@@ -1,0 +1,85 @@
+
+@import "tailwindcss";
+
+
+/* FONT IMPORTS */
+@font-face {
+  font-family: 'bangers';
+  src: url('./assets/fonts/Bangers-Regular.ttf')
+}
+
+@font-face {
+  font-family: 'caveat';
+  src: url('./assets/fonts/Caveat-VariableFont_wght.ttf')
+}
+
+/* GLOBAL BRUH */
+body {
+  min-height: 100vh;
+}
+
+/* FONT CLASSES */
+.bangers-font {
+  font-family: 'bangers';
+}
+
+.caveat {
+  font-family: 'caveat';
+}
+
+
+
+@utility share-sm {
+  background-color: #22C55E;
+  border-radius: 3em;
+  padding: 0.1em 1.5em;
+  color: #fff;
+  font-size: 1.4rem;
+  transition: all .3s ease;
+  font-family: 'caveat';
+  border: 0.09em solid #000;
+}
+
+@utility share-lg {
+  background-color: #22C55E;
+  border-radius: 3em;
+  padding: 0.1em 1.5em;
+  color: #fff;
+  font-size: 2.4rem;
+  font-weight: bold;
+  transition: all .3s ease;
+  font-family: 'caveat';
+  border: 0.09em solid #000;
+}
+
+@utility receive-sm {
+  background-color: #FACC15;
+  border-radius: 3em;
+  padding: 0.1em 1.5em;
+  color: #000;
+  font-size: 1.4rem;
+  transition: all .3s ease;
+  font-family: 'caveat';
+  border: 0.09em solid #000;
+}
+
+.receive-sm:hover {
+  background-color: #EAB308;
+  cursor: pointer;
+}
+
+.share-sm:hover, .share-lg:hover {
+  background-color: #16A34A;
+  cursor: pointer;
+}
+
+.text-share {
+  color: #22C55E;
+}
+
+.text-receive {
+  color: #FACC15;
+}
+
+
+
