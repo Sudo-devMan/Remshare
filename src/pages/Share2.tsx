@@ -38,7 +38,7 @@ function Share2() {
                             className="rounded-xl p-2 text-2xl outline-2 outline-blue-800 bg-blue-400 text-blue-950" cols={23} rows={5}></textarea>
                     </div>
                     <div className="fixed bottom-4 sm:right-4 w-full flex justify-center md:justify-end">
-                        <button type="submit" className="share-lg">
+                        <button className="share-lg"> {/* ADD TYPE SUBMIT WHEN CONNECTING TO BACKEND */}
                             SHARE <FontAwesomeIcon icon={faFileUpload} />
                         </button>
                     </div>

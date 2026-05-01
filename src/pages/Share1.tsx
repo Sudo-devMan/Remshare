@@ -1,22 +1,29 @@
 import { faArrowRight, faCloudArrowUp } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import {useDropzone,type FileWithPath} from 'react-dropzone'
 import { Link } from "react-router-dom"
 
+// TODO: create array of file names and display them to the screen
+// allow user to add more files without resetting the previously added files
+
 function Share1() {
     const formData: FormData = new FormData()
+    const [fileNames, setFileNames] = useState<Array<string | undefined>>()
 
     const filesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const target = e.target as HTMLInputElement & {
             files: FileList
         }
         console.log(target.files)
+        // const fNames: Array<string | undefined> = target.files.
+
+        // setFileNames(fNames)
+        formData.append('shareFiles', JSON.stringify(target.files))
     }
 
     const onDrop = useCallback((selectedFiles: FileWithPath[]) => {
         console.log("Use callback", selectedFiles);
-        formData.append('shareFiles', JSON.stringify(selectedFiles))
     }, [])
 
     const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});

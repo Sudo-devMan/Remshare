@@ -16,7 +16,9 @@ const Home = () => {
               <Link to={'/share'}>
                 <button className="share-sm">Share</button>
               </Link>
-              <button className="receive-sm">Receive</button>
+              <Link to={'/receive'}>
+                <button className="receive-sm">Receive</button>
+              </Link>
             </div>
           </div>
           <div className='hidden sm:block'>
