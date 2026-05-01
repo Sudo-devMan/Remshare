@@ -1,6 +1,6 @@
 import { faArrowRight, faCloudArrowUp } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 import {useDropzone,type FileWithPath} from 'react-dropzone'
 import { Link } from "react-router-dom"
 
@@ -9,7 +9,7 @@ import { Link } from "react-router-dom"
 
 function Share1() {
     const formData: FormData = new FormData()
-    const [fileNames, setFileNames] = useState<Array<string | undefined>>()
+    // const [fileNames, setFileNames] = useState<Array<string | undefined>>()
 
     const filesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const target = e.target as HTMLInputElement & {

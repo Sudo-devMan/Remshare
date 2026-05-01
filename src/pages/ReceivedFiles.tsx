@@ -1,6 +1,5 @@
 import { faCloudDownload } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import sendSvg from "../assets/bgs/about.svg"
 
 // TODO: How to truncate text in tailwind or css
 //       Then add some state for a see more feature
@@ -69,9 +68,7 @@ function ReceivedFiles() {
                 </div>
 
                 <div className="hidden sm:block">
-                    <object type="image/svg+xml" data={sendSvg} width="360" height="260">
-                        <p>your device does not support svgs</p>
-                </object>
+                    <img src="src/assets/bgs/receive.jpg" alt="receive image" />
                 </div>
             </div>
         {/* </center> */}
