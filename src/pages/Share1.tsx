@@ -1,25 +1,33 @@
 import { faArrowRight, faCloudArrowUp } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import {useDropzone,type FileWithPath} from 'react-dropzone'
 import { Link } from "react-router-dom"
+import { useShare } from "../context"
 
-// TODO: create array of file names and display them to the screen
+// TODO(DONE): create array of file names and display them to the screen
 // allow user to add more files without resetting the previously added files
 
 function Share1() {
-    const formData: FormData = new FormData()
-    // const [fileNames, setFileNames] = useState<Array<string | undefined>>()
+    const [isDropped, setIsDropped] = useState<boolean>(false)
+    const [fileNames, setFileNames] = useState<Array<string | undefined>>()
+    const {setShareData} = useShare()
 
     const filesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        localStorage.clear() // removeItem (later)
         const target = e.target as HTMLInputElement & {
             files: FileList
         }
         console.log(target.files)
-        // const fNames: Array<string | undefined> = target.files.
-
-        // setFileNames(fNames)
-        formData.append('shareFiles', JSON.stringify(target.files))
+        setShareData((p) => ({...p, files: e.target.files}))
+        let selectedFiles = target.files
+        let files: string[] = [];
+        for (let i = 0; i < selectedFiles.length; i++) {
+            files.push(selectedFiles[i].name)
+        }
+        setFileNames(files)
+        setIsDropped(true)
+        console.log("Names: ", fileNames)
     }
 
     const onDrop = useCallback((selectedFiles: FileWithPath[]) => {
@@ -35,9 +43,15 @@ function Share1() {
             <div style={{cursor: 'pointer'}} {...getRootProps()} className="flex flex-col align-center justify-center border-2 border-green-700 shadow-xl shadow-green-500/50 bg-green-600 w-70 h-70 p-10 rounded-full text-white text-center caveat text-3xl">
                 <input className="hidden" {...getInputProps()} onChange={filesChange} type="file" name="filesInput" multiple />
                 {
-                    isDragActive ? 
-                        <p>Drop them files here bruh...</p> :
-                        <p>Click here to select files.. or just drag and drop</p>
+                    isDropped ? 
+                        <p className="">
+                            CLICK NEXT TO CONTINUE <br />
+                            {fileNames && fileNames.map((fname, _) => {
+                                return <span key={Math.floor(Math.random()*100000000)} className="text-yellow-300 text-sm">{fname?.slice(0, 10)}...</span>
+                            })} </p> 
+                        : isDragActive ? 
+                            <p>DROP FILES HERE</p> : 
+                            <p>Click here or drop files to share</p>
                 }
                 <p className="text-center">
                     <FontAwesomeIcon icon={faCloudArrowUp} />

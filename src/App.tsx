@@ -5,10 +5,12 @@ import Share1 from './pages/Share1'
 import Share2 from './pages/Share2'
 import ReceiveForm from './pages/ReceiveForm'
 import ReceivedFiles from './pages/ReceivedFiles'
+import { ShareProvider } from './context'
 
 function App() {
   return (
-    <div>
+    <ShareProvider>
+      <div>
       <Routes>
         <Route index element={<Home/>}/>
         <Route path='share' element={<Share1/>} />
@@ -17,6 +19,8 @@ function App() {
         <Route path='received-files' element={<ReceivedFiles/>} />
       </Routes>
     </div>
+    </ShareProvider>
+    
   )
 }
 
