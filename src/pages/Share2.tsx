@@ -1,12 +1,12 @@
 import { faEye, faEyeSlash, faFileUpload } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import sendSvg from "../assets/bgs/send.svg"
 import { useShare } from "../context";
 import { useState } from "react";
 import api from "../config/api";
 import type { AxiosResponse } from "axios";
 import type { ShareFile } from "../config/types";
 import { Link } from "react-router-dom";
+import { SHARED_STATE } from "../config/constants";
 
 const textInputClasses: string = "rounded-xl p-2 text-2xl border-2 border-blue-800 bg-blue-400 text-blue-950";
 
@@ -44,6 +44,7 @@ function Share2() {
                 console.log("Response: ", response)
                 console.log("Unique ID: ", response.data.uniqueId)
                 setShared(true)
+                localStorage.setItem(SHARED_STATE, 'true')
             }
         } catch (err: any) {
             alert(err.message)
@@ -60,7 +61,7 @@ function Share2() {
 
        
        {
-    !shared ? (
+    !shared && localStorage.getItem(SHARED_STATE) !== 'true' ? (
         <div className="w-full min-h-screen sm:grid sm:grid-cols-2 flex flex-col items-center justify-center p-4 gap-6">
             <form aria-disabled method="post" onSubmit={handleSubmit} className="w-full max-w-md">
                 <div className="mb-5">
@@ -115,7 +116,7 @@ function Share2() {
             </form>
 
             <div className="hidden sm:flex justify-center items-center w-full">
-                <object type="image/svg+xml" data={sendSvg} className="w-full max-w-[360px] h-auto">
+                <object type="image/svg+xml" data="/bgs/send.svg" className="w-full max-w-[360px] h-auto">
                     <p>your device does not support svgs</p>
                 </object>
             </div>
@@ -163,6 +164,7 @@ function Share2() {
                             <li>To receive the files you are going to need the <span className="font-bold">password</span>, <span className="font-bold">receiver email</span>, and the <span className="font-bold">unique ID</span></li>
                             <li>This share record will be deleted in 24hrs</li>
                             <li>Files can be downloaded/received as many times as you want</li>
+                            <li>We recommend you <span className="text-blue-800">take a screenshot of this page as it may disappear</span> for security purposes if you refresh or leave the page</li>
                         </ul>
                     </section>
                 </div>

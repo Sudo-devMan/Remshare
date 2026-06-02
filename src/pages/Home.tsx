@@ -21,7 +21,7 @@ const Home = () => {
             </div>
           </div>
           <div className='hidden sm:block'>
-            <img src="src/assets/bgs/hero.jpg" width={420} alt="hero image" />
+            <img src="/bgs/hero.jpg" width={420} alt="hero image" />
           </div>
         </div>
       </div>
@@ -35,13 +35,13 @@ const Home = () => {
               </p>
           </div>
           <div className='w-full flex justify-center align-center'>
-            <img src="src/assets/bgs/about.jpg" alt="about" width={360} />
+            <img src="/bgs/about.jpg" alt="about" width={360} />
           </div>
         </div>
 
         <div className="sm:grid sm:grid-cols-2 mb-8">
           <div className='w-full flex justify-center align-center'>
-            <img src="src/assets/bgs/sharing.jpg" alt="sharing" width={360} />
+            <img src="/bgs/sharing.jpg" alt="sharing" width={360} />
           </div>
           <div className="p-2 m-3 rounded-xl">
               <h1 className="text-center text-4xl bangers-font mb-3">HOW TO <span className="text-share">SHARE</span></h1>
@@ -59,13 +59,13 @@ const Home = () => {
               </p>
           </div>
           <div className='w-full flex justify-center align-center'>
-            <img src="src/assets/bgs/receive.jpg" alt="receive" width={360} />
+            <img src="/bgs/receive.jpg" alt="receive" width={360} />
           </div>
         </div>
 
         <div className="sm:grid sm:grid-cols-2">
           <div className='w-full flex justify-center align-center'>
-            <img src="src/assets/bgs/info.jpg" alt="receive" width={360} />
+            <img src="/bgs/info.jpg" alt="receive" width={360} />
           </div>
           <div className="p-2 m-3 rounded-xl">
               <h1 className="text-center text-4xl bangers-font mb-3">PLEASE <span className="text-red-600">NOTE</span></h1>

@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import sendSvg from "../assets/bgs/receive.svg";
 import { faFileDownload } from "@fortawesome/free-solid-svg-icons/faFileDownload";
 import api from "../config/api";
 import type { AxiosResponse } from "axios";
 
 const textInputClasses: string = "rounded-xl p-2 text-2xl border-2 border-blue-800 bg-blue-400 text-blue-950";
 
-interface FileData {
+interface SharingResponse {
     id: number;
-    name: string;
-    url: string;
+    note?: string;
+    receiverEmail: string;
+    senderEmail: string;
+    uniqueId: string;
+    files: string[];
 }
 
 function ReceiveForm() {
@@ -21,7 +23,9 @@ function ReceiveForm() {
     });
     const [loading, setLoading] = useState(false);
     const [received, setReceived] = useState(false);
-    const [downloadedFiles, setDownloadedFiles] = useState<FileData[]>([]);
+    
+    const [downloadedFiles, setDownloadedFiles] = useState<string[]>([]);
+    const [sharingMeta, setSharingMeta] = useState<{ senderEmail?: string; note?: string }>({});
     const [showAllFiles, setShowAllFiles] = useState(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,14 +38,17 @@ function ReceiveForm() {
         setLoading(true);
 
         try {
-            const response: AxiosResponse<any> = await api.post('sharing/receive/', receiveData);
+            const response: AxiosResponse<SharingResponse> = await api.post('sharing/receive/', receiveData);
             
             if (response.status === 200 || response.status === 201) {
                 alert('Files retrieved successfully!');
                 
-                // Set the structured files array populated by the backend
                 if (response.data?.files) {
                     setDownloadedFiles(response.data.files);
+                    setSharingMeta({
+                        senderEmail: response.data.senderEmail,
+                        note: response.data.note
+                    });
                 }
                 setReceived(true);
             }
@@ -53,13 +60,17 @@ function ReceiveForm() {
         }
     };
 
-    // Programmatic click execution for dynamic multi-file batch downloading
+    const getFileName = (fileUrl: string): string => {
+        if (!fileUrl) return "Unknown_File";
+        return fileUrl.split('/').pop()?.split('\\').pop() || "download";
+    };
+
     const handleDownloadAll = () => {
-        downloadedFiles.forEach((file) => {
-            if (file.url) {
+        downloadedFiles.forEach((fileUrl) => {
+            if (fileUrl) {
                 const link = document.createElement('a');
-                link.href = file.url;
-                link.download = file.name || 'download';
+                link.href = fileUrl;
+                link.download = getFileName(fileUrl);
                 link.target = '_blank';
                 link.rel = 'noreferrer';
                 document.body.appendChild(link);
@@ -130,7 +141,7 @@ function ReceiveForm() {
                         </form>
 
                         <div className="hidden sm:flex justify-center items-center w-full">
-                            <object type="image/svg+xml" data={sendSvg} className="w-full max-w-[360px] h-auto">
+                            <object type="image/svg+xml" data="/bgs/receive.svg" className="w-full max-w-[360px] h-auto">
                                 <p>your device does not support svgs</p>
                             </object>
                         </div>
@@ -143,6 +154,11 @@ function ReceiveForm() {
                             
                             <div className="flex flex-col gap-4 mt-2">
                                 <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
+                                    <h1 className="caveat font-bold text-2xl sm:mr-3">Sender: </h1> 
+                                    <span className="break-all">{sharingMeta.senderEmail || 'anonymous@no-email.remshare'}</span>
+                                </div>
+
+                                <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
                                     <h1 className="caveat font-bold text-2xl sm:mr-3">Receiver: </h1> 
                                     <span className="break-all">{receiveData.receiverEmail}</span>
                                 </div>
@@ -152,7 +168,13 @@ function ReceiveForm() {
                                     <span className="break-all">{receiveData.uniqueId}</span>
                                 </div>
 
-                                {/* File List Section */}
+                                {sharingMeta.note && (
+                                    <div className="bg-blue-200 p-4 rounded-lg flex flex-col">
+                                        <h1 className="caveat font-bold text-2xl mb-1">Note left by sender:</h1> 
+                                        <p className="italic text-blue-950">{sharingMeta.note}</p>
+                                    </div>
+                                )}
+
                                 {downloadedFiles.length > 0 && (
                                     <div className="bg-blue-200 p-4 rounded-lg flex flex-col">
                                         <h1 className="caveat font-bold text-2xl mb-3">Available Files:</h1>
@@ -160,29 +182,31 @@ function ReceiveForm() {
                                         <ul className="space-y-2 mb-1">
                                             {downloadedFiles
                                                 .slice(0, showAllFiles ? downloadedFiles.length : 5)
-                                                .map((file, idx) => (
-                                                    <li key={file.id || idx} className="flex items-center justify-between p-2 rounded-lg bg-blue-100 hover:bg-blue-50 transition-colors">
-                                                        <span className="break-all pr-4 text-lg font-medium text-blue-950">
-                                                            {file.name}
-                                                        </span>
-                                                        {file.url && (
-                                                            <a 
-                                                                href={file.url} 
-                                                                download={file.name}
-                                                                target="_blank" 
-                                                                rel="noreferrer"
-                                                                className="text-blue-800 hover:text-blue-600 p-1 text-xl flex items-center"
-                                                                title={`Download ${file.name}`}
-                                                            >
-                                                                <FontAwesomeIcon icon={faFileDownload} />
-                                                            </a>
-                                                        )}
-                                                    </li>
-                                                ))
+                                                .map((fileUrl, idx) => {
+                                                    const cleanName = getFileName(fileUrl);
+                                                    return (
+                                                        <li key={idx} className="flex items-center justify-between p-2 rounded-lg bg-blue-100 hover:bg-blue-50 transition-colors">
+                                                            <span className="break-all pr-4 text-lg font-medium text-blue-950">
+                                                                {cleanName}
+                                                            </span>
+                                                            {fileUrl && (
+                                                                <a 
+                                                                    href={fileUrl} 
+                                                                    download={cleanName}
+                                                                    target="_blank" 
+                                                                    rel="noreferrer"
+                                                                    className="text-blue-800 hover:text-blue-600 p-1 text-xl flex items-center"
+                                                                    title={`Download ${cleanName}`}
+                                                                >
+                                                                    <FontAwesomeIcon icon={faFileDownload} />
+                                                                </a>
+                                                            )}
+                                                        </li>
+                                                    );
+                                                })
                                             }
                                         </ul>
 
-                                        {/* Show More toggle controls */}
                                         {downloadedFiles.length > 5 && (
                                             <button 
                                                 type="button"
@@ -193,7 +217,6 @@ function ReceiveForm() {
                                             </button>
                                         )}
 
-                                        {/* Download All CTA element */}
                                         <div className="mt-2 pt-3 border-t border-blue-300 flex justify-end">
                                             <button 
                                                 type="button"
