@@ -65,17 +65,32 @@ function ReceiveForm() {
         return fileUrl.split('/').pop()?.split('\\').pop() || "download";
     };
 
+    const triggerDownload = async (fileUrl: string) => {
+        try {
+            const response = await fetch(fileUrl);
+            if (!response.ok) throw new Error('Network response error');
+            
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = getFileName(fileUrl);
+            document.body.appendChild(link);
+            link.click();
+            
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(blobUrl);
+        } catch (error) {
+            console.error("Failed to force download, falling back to open window.", error);
+            window.open(fileUrl, '_blank');
+        }
+    };
+
     const handleDownloadAll = () => {
         downloadedFiles.forEach((fileUrl) => {
             if (fileUrl) {
-                const link = document.createElement('a');
-                link.href = fileUrl;
-                link.download = getFileName(fileUrl);
-                link.target = '_blank';
-                link.rel = 'noreferrer';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                triggerDownload(fileUrl);
             }
         });
     };
@@ -190,16 +205,14 @@ function ReceiveForm() {
                                                                 {cleanName}
                                                             </span>
                                                             {fileUrl && (
-                                                                <a 
-                                                                    href={fileUrl} 
-                                                                    download={cleanName}
-                                                                    target="_blank" 
-                                                                    rel="noreferrer"
-                                                                    className="text-blue-800 hover:text-blue-600 p-1 text-xl flex items-center"
+                                                                <button 
+                                                                    type="button"
+                                                                    onClick={() => triggerDownload(fileUrl)}
+                                                                    className="text-blue-800 hover:text-blue-600 p-1 text-xl flex items-center bg-transparent border-none cursor-pointer"
                                                                     title={`Download ${cleanName}`}
                                                                 >
                                                                     <FontAwesomeIcon icon={faFileDownload} />
-                                                                </a>
+                                                                </button>
                                                             )}
                                                         </li>
                                                     );
