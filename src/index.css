@@ -75,6 +75,7 @@ body {
   border: 0.09em solid #000;
 }
 
+
 .receive-sm:hover, .receive-lg:hover {
   background-color: #EAB308;
   cursor: pointer;
@@ -106,3 +107,8 @@ td, th, table {
 /* td:last-child {
   border: none;
 } */
+
+/* AXIOS LOADING BRUH */
+#nprogress .bar {
+  height: .5em !important;
+}

@@ -145,13 +145,15 @@ function ReceiveForm() {
                             </div>
                             
                             <div className="mt-6 w-full flex justify-center sm:justify-start">
-                                <button type="submit" disabled={loading} className="receive-lg w-full sm:w-auto">
-                                    {loading ? (
-                                        <span>FETCHING...</span>
-                                    ) : (
-                                        <span>RECEIVE <FontAwesomeIcon icon={faFileDownload} /></span>
-                                    )}
-                                </button>
+                                {
+                                    !loading ? 
+                                        <button type="submit" className="receive-lg w-full sm:w-auto">
+                                            <span>RECEIVE <FontAwesomeIcon icon={faFileDownload} /></span>
+                                        </button> :
+                                        <button disabled type="submit" className="receive-lg w-full sm:w-auto">
+                                            <span>RECEIVING...</span>
+                                        </button>
+                                }
                             </div>
                         </form>
 

@@ -4,7 +4,7 @@ import nprogress from 'nprogress'
 import 'nprogress/nprogress.css'
 
 nprogress.configure({
-    showSpinner: false,
+    showSpinner: true,
     speed: 400,
     minimum: 0.1
 })
