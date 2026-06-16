@@ -15,7 +15,7 @@ function ReceiveForm() {
     const [loading, setLoading] = useState(false)
 
     const {receiveData, setReceiveData} = useReceive();
-    const {shareData, setShareData} = useShare();
+    const {setShareData} = useShare();
 
     const receiverEmail= searchParams.get('receiverEmail')
     const uniqueId = searchParams.get('uniqueId')
