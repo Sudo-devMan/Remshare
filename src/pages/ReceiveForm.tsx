@@ -1,271 +1,154 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileDownload } from "@fortawesome/free-solid-svg-icons/faFileDownload";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useReceive, useShare } from "../context";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import api from "../config/api";
-import type { AxiosResponse } from "axios";
-import { Link } from "react-router-dom";
+
 
 const textInputClasses: string = "rounded-xl p-2 text-2xl border-2 border-blue-800 bg-blue-400 text-blue-950";
 
-interface SharingResponse {
-    id: number;
-    note?: string;
-    receiverEmail: string;
-    senderEmail: string;
-    uniqueId: string;
-    files: string[];
-}
-
 function ReceiveForm() {
-    const [receiveData, setReceiveData] = useState({
-        receiverEmail: "",
-        password: "",
-        uniqueId: ""
-    });
-    const [loading, setLoading] = useState(false);
-    const [received, setReceived] = useState(false);
-    
-    const [downloadedFiles, setDownloadedFiles] = useState<string[]>([]);
-    const [sharingMeta, setSharingMeta] = useState<{ senderEmail?: string; note?: string }>({});
-    const [showAllFiles, setShowAllFiles] = useState(false);
+    const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const [loading, setLoading] = useState(false)
 
+    const {receiveData, setReceiveData} = useReceive();
+    const {shareData, setShareData} = useShare();
+
+    const receiverEmail= searchParams.get('receiverEmail')
+    const uniqueId = searchParams.get('uniqueId')
+
+    useEffect(() => {
+        if (receiverEmail && uniqueId) {
+            setReceiveData(p => ({...p, receiverEmail, uniqueId}))
+        }
+    }, [receiverEmail, uniqueId])
+    
+    
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setReceiveData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        setLoading(true);
+    const allInfo = !!(receiveData.password && receiveData.receiverEmail && receiveData.uniqueId)
 
+    const subMit = async(e: React.SubmitEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setLoading(true)
         try {
-            const response: AxiosResponse<SharingResponse> = await api.post('sharing/receive/', receiveData);
-            
-            if (response.status === 200 || response.status === 201) {
-                alert('Files retrieved successfully!');
-                
-                if (response.data?.files) {
-                    setDownloadedFiles(response.data.files);
-                    setSharingMeta({
-                        senderEmail: response.data.senderEmail,
-                        note: response.data.note
-                    });
-                }
-                setReceived(true);
+            const data = await api.post('sharing/receive/', {...receiveData})
+            console.log("Data: ", data)
+            setShareData(data.data)
+            if (data.status === 201) {
+                // console.log(data)
+                alert("FIles received successfully. Redirecting to info page")
+                navigate('/received-files')
             }
         } catch (err: any) {
-            alert(err.response?.data?.message || err.message || "Failed to fetch files. Check your credentials.");
-            console.error(err);
+            alert(err.response?.data?.message || err.message || "Files not found. Please check your inputs")
+            console.log(err)
         } finally {
-            setLoading(false);
+            setLoading(false)
         }
-    };
 
-    const getFileName = (fileUrl: string): string => {
-        if (!fileUrl) return "Unknown_File";
-        return fileUrl.split('/').pop()?.split('\\').pop() || "download";
-    };
+        // navigate('/received-files')
+        // console.log("Receive data: ", receiveData);
+    }
 
-    const triggerDownload = async (fileUrl: string) => {
-        try {
-            const response = await fetch(fileUrl);
-            if (!response.ok) throw new Error('Network response error');
-            
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = getFileName(fileUrl);
-            document.body.appendChild(link);
-            link.click();
-            
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(blobUrl);
-        } catch (error) {
-            console.error("Failed to force download, falling back to open window.", error);
-            window.open(fileUrl, '_blank');
-        }
-    };
+    const [show, setShow] = useState(false)
+    
 
-    const handleDownloadAll = () => {
-        downloadedFiles.forEach((fileUrl) => {
-            if (fileUrl) {
-                triggerDownload(fileUrl);
-            }
-        });
-    };
+    
 
     return (
         <div className="h-screen sm:px-6">
-            <br /><br />
+            <br />
             <h1 className="text-center bangers-font text-6xl sm:text-8xl">
-                {received ? 'RECEIVED' : 'RECEIVE'} FILES
+                RECEIVE FILES
             </h1>
             <br />
-
-            {
-                !received ? (
-                    <div className="w-full min-h-screen sm:grid sm:grid-cols-2 flex flex-col items-center justify-center p-4 gap-6">
-                        <form aria-disabled={loading} method="post" onSubmit={handleSubmit} className="w-full max-w-md">
-                            <div className="mb-5">
-                                <p className="caveat text-xl">Receiver's email:</p>
-                                <input 
-                                    type="email" 
-                                    disabled={loading}
-                                    name="receiverEmail" 
-                                    value={receiveData.receiverEmail}
-                                    onChange={handleChange}
-                                    placeholder="receiver email..." 
-                                    className={`${textInputClasses} w-full`}
-                                    required
-                                />
-                            </div>
-                            <div className="mb-5">
-                                <p className="caveat text-xl">Files password:</p>
-                                <input 
-                                    type="password" 
-                                    name="password" 
-                                    disabled={loading}
-                                    value={receiveData.password}
-                                    onChange={handleChange}
-                                    placeholder="files password..." 
-                                    className={`${textInputClasses} w-full`}
-                                    required
-                                />
-                            </div>
-                            <div className="mb-5">
-                                <p className="caveat text-xl">Unique ID:</p>
-                                <input 
-                                    type="text" 
-                                    name="uniqueId" 
-                                    disabled={loading}
-                                    value={receiveData.uniqueId}
-                                    onChange={handleChange}
-                                    placeholder="Unique ID..." 
-                                    className={`${textInputClasses} w-full`}
-                                    required
-                                />
-                            </div>
-                            
-                            <div className="mt-6 w-full flex justify-center sm:justify-start">
-                                {
-                                    !loading ? 
-                                        <button type="submit" className="receive-lg w-full sm:w-auto">
-                                            <span>RECEIVE <FontAwesomeIcon icon={faFileDownload} /></span>
-                                        </button> :
-                                        <button disabled className="receive-lg text-xl w-full sm:w-auto">
-                                            <svg aria-hidden="true" className="w-4 h-4 text-neutral-tertiary animate-spin fill-brand me-2 inline" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-                                            </svg>
-                                            RECEIVING
-                                        </button>
-                                }
-                            </div>
-                        </form>
-
-                        <div className="hidden sm:flex justify-center items-center w-full">
-                            <object type="image/svg+xml" data="/bgs/receive.svg" className="w-full max-w-[360px] h-auto">
-                                <p>your device does not support svgs</p>
-                            </object>
+            <div className="w-full min-h-screen sm:grid sm:grid-cols-2 flex flex-col items-center justify-center p-4 gap-6">
+                <form method="post" onSubmit={subMit} className="w-full max-w-md">
+                    {
+                        !receiverEmail && 
+                        <div className="mb-5">
+                            <p className="caveat text-xl">Receiver's email:</p>
+                            <input 
+                                type="email" 
+                                name="receiverEmail" 
+                                value={receiveData.receiverEmail}
+                                onChange={handleChange}
+                                placeholder="receiver email..." 
+                                className={`${textInputClasses} w-full`}
+                            />
+                        </div>
+                    }
+                    <div className="mb-5">
+                        <p className="caveat text-xl">Files password:</p>
+                        <div className="relative flex items-center">
+                            <input 
+                                type={show ? "text" : "password"} 
+                                name="password" 
+                                value={receiveData.password}
+                                onChange={handleChange}
+                                placeholder="files password..." 
+                                className={`${textInputClasses} w-full inline-block`}
+                            />
+                            <button onClick={() => setShow(p => !p)} type="button" className="absolute text-xl right-3 focus:outline-none">
+                                <FontAwesomeIcon icon={show ? faEye : faEyeSlash} />
+                            </button>
                         </div>
                     </div>
-                ) : (
-                    <div className="w-full py-10 px-4 max-w-4xl mx-auto">
-                        <div className="rounded-sm border border-blue-700 bg-blue-300 p-6 md:p-10 border-3">
-                            <h1 className="text-center bangers-font text-3xl text-blue-900">Download Information</h1>
-                            <p className="text-center caveat text-lg mb-6">Your download request was authenticated successfully.</p>
-                            
-                            <div className="flex flex-col gap-4 mt-2">
-                                <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
-                                    <h1 className="caveat font-bold text-2xl sm:mr-3">Sender: </h1> 
-                                    <span className="break-all">{sharingMeta.senderEmail || 'anonymous@no-email.remshare'}</span>
-                                </div>
-
-                                <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
-                                    <h1 className="caveat font-bold text-2xl sm:mr-3">Receiver: </h1> 
-                                    <span className="break-all">{receiveData.receiverEmail}</span>
-                                </div>
-                                
-                                <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
-                                    <h1 className="caveat font-bold text-2xl sm:mr-3">Unique ID Authenticated: </h1> 
-                                    <span className="break-all">{receiveData.uniqueId}</span>
-                                </div>
-
-                                {sharingMeta.note && (
-                                    <div className="bg-blue-200 p-4 rounded-lg flex flex-col">
-                                        <h1 className="caveat font-bold text-2xl mb-1">Note left by sender:</h1> 
-                                        <p className="italic text-blue-950">{sharingMeta.note}</p>
-                                    </div>
-                                )}
-
-                                {downloadedFiles.length > 0 && (
-                                    <div className="bg-blue-200 p-4 rounded-lg flex flex-col">
-                                        <h1 className="caveat font-bold text-2xl mb-3">Available Files:</h1>
-                                        
-                                        <ul className="space-y-2 mb-1">
-                                            {downloadedFiles
-                                                .slice(0, showAllFiles ? downloadedFiles.length : 5)
-                                                .map((fileUrl, idx) => {
-                                                    const cleanName = getFileName(fileUrl);
-                                                    return (
-                                                        <li key={idx} className="flex items-center justify-between p-2 rounded-lg bg-blue-100 hover:bg-blue-50 transition-colors">
-                                                            <span className="break-all pr-4 text-lg font-medium text-blue-950">
-                                                                <a target="_blank" href={fileUrl}>{cleanName}</a>
-                                                            </span>
-                                                            {fileUrl && (
-                                                                <button 
-                                                                    type="button"
-                                                                    onClick={() => triggerDownload(fileUrl)}
-                                                                    className="text-blue-800 hover:text-blue-600 p-1 text-xl flex items-center bg-transparent border-none cursor-pointer"
-                                                                    title={`Download ${cleanName}`}
-                                                                >
-                                                                    <FontAwesomeIcon icon={faFileDownload} />
-                                                                </button>
-                                                            )}
-                                                        </li>
-                                                    );
-                                                })
-                                            }
-                                        </ul>
-
-                                        {downloadedFiles.length > 5 && (
-                                            <button 
-                                                type="button"
-                                                onClick={() => setShowAllFiles(!showAllFiles)}
-                                                className="text-left text-sm font-bold text-blue-900 hover:underline mb-4 mt-1"
-                                            >
-                                                {showAllFiles ? "See Less ▲" : `See More (${downloadedFiles.length - 5} more) ▼`}
-                                            </button>
-                                        )}
-
-                                        <div className="mt-2 pt-3 border-t border-blue-300 flex justify-end">
-                                            <button 
-                                                type="button"
-                                                onClick={handleDownloadAll}
-                                                className="bg-blue-800 text-white font-bold py-2 px-4 rounded-xl hover:bg-blue-950 transition-colors flex items-center gap-2"
-                                            >
-                                                Download All ({downloadedFiles.length}) <FontAwesomeIcon icon={faFileDownload} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                                
-                                <section className="mt-6 px-2 md:px-15">
-                                    <h1 className="text-center bangers-font text-3xl text-blue-900 mb-2">Ekse! Please note:</h1>
-                                    <ul className="caveat list-disc text-xl pl-5 space-y-1">
-                                        <li>If your dynamic browser downloads haven't started, check your popup permissions.</li>
-                                        <li>This share session parameters expire 24 hours from initial upload creation.</li>
-                                        <li>You can re-request this payload using these exact access details up until termination.</li>
-                                    </ul>
-                                </section>
-                            </div>
+                    {
+                        !uniqueId &&
+                        <div className="mb-5">
+                            <p className="caveat text-xl">Unique ID:</p>
+                            <input 
+                                type="text" 
+                                name="uniqueId" 
+                                value={receiveData.uniqueId}
+                                onChange={handleChange}
+                                placeholder="Unique ID..." 
+                                className={`${textInputClasses} w-full`}
+                            />
                         </div>
-                        <Link className="caveat text-xl underline" to="/">Back home</Link>
+                    }
+                    
+                    <div className="mt-6 w-full flex justify-center sm:justify-start">
+                        {
+                            allInfo ? 
+                                loading ?
+                                    <button disabled type="button" className="text-2xl receive-lg w-full sm:w-auto">
+                                        <span>FETCHING... <FontAwesomeIcon icon={faFileDownload} /></span>
+                                        <svg aria-hidden="true" className="w-4 h-4 text-neutral-tertiary animate-spin fill-brand me-2 inline" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                                        </svg>
+                                    </button>
+                                    :
+                                    <button type="submit" className="receive-lg w-full sm:w-auto">
+                                        <span>RECEIVE <FontAwesomeIcon icon={faFileDownload} /></span>
+                                    </button>
+                                :
+                                <button disabled className="receive-lg w-full sm:w-auto">
+                                    {/* <svg aria-hidden="true" className="w-4 h-4 text-neutral-tertiary animate-spin fill-brand me-2 inline" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
+                                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                                    </svg> */}
+                                    RECEIVE
+                                </button>
+                        }
                     </div>
-                )
-            }
+                </form>
+
+                <div className="hidden sm:flex justify-center items-center w-full">
+                    <object type="image/svg+xml" data="/bgs/receive.svg" className="w-full max-w-[360px] h-auto">
+                        <p>your device does not support svgs</p>
+                    </object>
+                </div>
+            </div>
         </div>
     );
 }

@@ -1,71 +1,107 @@
 import { faArrowRight, faCloudArrowUp } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useCallback, useState } from "react"
-import {useDropzone,type FileWithPath} from 'react-dropzone'
+import { useDropzone, type FileWithPath } from "react-dropzone"
 import { Link } from "react-router-dom"
 import { useShare } from "../context"
 
-// TODO(DONE): create array of file names and display them to the screen
-// allow user to add more files without resetting the previously added files
-
 function Share1() {
-    const [isDropped, setIsDropped] = useState<boolean>(false)
-    const [fileNames, setFileNames] = useState<Array<string | undefined>>()
-    const {setShareData} = useShare()
+    const [fileNames, setFileNames] = useState<string[]>([])
+    const { setShareData } = useShare()
 
-    const filesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        localStorage.clear() // removeItem (later)
-        const target = e.target as HTMLInputElement & {
-            files: FileList
-        }
-        console.log(target.files)
-        setShareData((p) => ({...p, files: e.target.files}))
-        let selectedFiles = target.files
-        let files: string[] = [];
-        for (let i = 0; i < selectedFiles.length; i++) {
-            files.push(selectedFiles[i].name)
-        }
-        setFileNames(files)
-        setIsDropped(true)
-        console.log("Names: ", fileNames)
+    const handleFiles = (files: File[]) => {
+        if (!files.length) return
+
+        setShareData(prev => ({
+            ...prev,
+            files
+        }))
+
+        setFileNames(prev => [
+            ...prev,
+            ...files.map(file => file.name)
+        ])
     }
 
-    const onDrop = useCallback((selectedFiles: FileWithPath[]) => {
-        console.log("Use callback", selectedFiles);
+    const filesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleFiles(Array.from(e.target.files ?? []))
+    }
+
+    const onDrop = useCallback((files: FileWithPath[]) => {
+        handleFiles(files)
     }, [])
 
-    const {getRootProps, getInputProps, isDragActive} = useDropzone({onDrop});
-  return (
-    <div className="w-full h-screen"><br /><br /><br /><br />
-      <div>
-        <h1 className="text-center bangers-font text-6xl m-5 sm:text-8xl">SHARE FILES</h1>
-        <center>
-            <div style={{cursor: 'pointer'}} {...getRootProps()} className="flex flex-col align-center justify-center border-2 border-green-700 shadow-xl shadow-green-500/50 bg-green-600 w-70 h-70 p-10 rounded-full text-white text-center caveat text-3xl">
-                <input className="hidden" {...getInputProps()} onChange={filesChange} type="file" name="filesInput" multiple />
-                {
-                    isDropped ? 
-                        <p className="">
-                            CLICK NEXT TO CONTINUE <br />
-                            {fileNames && fileNames.map((fname, _) => {
-                                return <span key={Math.floor(Math.random()*100000000)} className="text-yellow-300 text-sm">{fname?.slice(0, 10)}...</span>
-                            })} </p> 
-                        : isDragActive ? 
-                            <p>DROP FILES HERE</p> : 
-                            <p>Click here or drop files to share</p>
-                }
-                <p className="text-center">
-                    <FontAwesomeIcon icon={faCloudArrowUp} />
-                </p>
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop
+    })
+
+    const hasFiles = fileNames.length > 0
+
+    return (
+        <div className="w-full min-h-screen pt-20">
+            <h1 className="text-center bangers-font text-6xl m-5 sm:text-8xl">
+                SHARE FILES
+            </h1>
+
+            <div className="flex justify-center px-4">
+                <div
+                    {...getRootProps()}
+                    className="cursor-pointer flex flex-col items-center justify-center border-2 border-green-700 shadow-xl shadow-green-500/50 bg-green-600 w-full max-w-md min-h-80 p-8 rounded-3xl text-white text-center caveat text-3xl"
+                >
+                    <input
+                        {...getInputProps()}
+                        onChange={filesChange}
+                        type="file"
+                        name="filesInput"
+                        multiple
+                    />
+
+                    <FontAwesomeIcon
+                        icon={faCloudArrowUp}
+                        className="text-5xl mb-4"
+                    />
+
+                    {hasFiles ? (
+                        <>
+                            <p className="font-bold mb-3">
+                                {fileNames.length} file(s) selected
+                            </p>
+
+                            <div className="w-full max-h-40 overflow-y-auto space-y-1">
+                                {fileNames.map((fname, index) => (
+                                    <p
+                                        key={`${fname}-${index}`}
+                                        className="text-yellow-300 text-sm truncate"
+                                    >
+                                        {fname}
+                                    </p>
+                                ))}
+                            </div>
+                        </>
+                    ) : isDragActive ? (
+                        <p>Drop files here</p>
+                    ) : (
+                        <p>
+                            Drag & drop files here
+                            <br />
+                            or click to browse
+                        </p>
+                    )}
+                </div>
             </div>
-        </center>
-        <div className="fixed bottom-4 sm:right-4 w-full flex justify-center md:justify-end">
-            <Link to="/share/prepare-files" className="share-lg">
-                NEXT <FontAwesomeIcon icon={faArrowRight} />
-            </Link>
+
+            <div className="fixed bottom-4 right-0 left-0 md:left-auto md:right-4 flex justify-center md:justify-end px-4">
+                <Link
+                    to={hasFiles ? "/share/prepare-files" : "#"}
+                    className={`share-lg ${
+                        !hasFiles ? "opacity-50 pointer-events-none" : ""
+                    }`}
+                >
+                    NEXT <FontAwesomeIcon icon={faArrowRight} />
+                </Link>
+            </div>
         </div>
-      </div>
-    </div>
-  )
+    )
 }
 
 export default Share1

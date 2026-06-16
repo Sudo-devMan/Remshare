@@ -12,47 +12,67 @@ const textInputClasses: string = "rounded-xl p-2 text-2xl border-2 border-blue-8
 
 
 function Share2() {
-    const {shareData, setShareData} = useShare()
-    const [sharing, setSharing] = useState(false)
-    const [shared, setShared] = useState(false)
-    const [passType, setPassType] = useState<'password' | 'text'>('password')
+    const { shareData, setShareData } = useShare();
+
+    const [sharing, setSharing] = useState(false);
+    const [shared, setShared] = useState(false);
+    const [passType, setPassType] = useState<'password' | 'text'>('password');
 
     const passToggle = () => {
-        setPassType(p => p === 'password' ? 'text' : 'password')
-    }
+    setPassType((p) => (p === 'password' ? 'text' : 'password'));
+    };
 
-    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setSharing(true)
-        
-        const formData = new FormData()
-        formData.append('senderEmail', shareData.senderEmail)
-        formData.append('receiverEmail', shareData.receiverEmail)
-        formData.append('password', shareData.password)
-        formData.append('note', shareData.note)
-        const filesArray = shareData.files ? Array.from(shareData.files) : [];
-        filesArray.forEach((file: any) => formData.append('files', file));
+    const handleSubmit = async (
+        e: React.SubmitEvent<HTMLFormElement>
+        ) => {
+        e.preventDefault();
+        setSharing(true);
 
-        console.log("Files arr bruh", filesArray)
+        const formData = new FormData();
+
+        formData.append('senderEmail', shareData.senderEmail);
+        formData.append('receiverEmail', shareData.receiverEmail);
+        formData.append('password', shareData.password);
+        formData.append('note', shareData.note);
+
+        const filesArray = shareData.files
+            ? Array.from(shareData.files)
+            : [];
+
+        filesArray.forEach((file: any) =>
+            formData.append('files', file)
+        );
+
+        console.log('Files arr bruh', filesArray);
 
         try {
-            const response: AxiosResponse<any, any, ShareFile> = await api.post('sharing/share/', formData)
+            const response: AxiosResponse<any, any, ShareFile> =
+            await api.post('sharing/share/', formData);
+
             if (response.status === 201) {
-                alert('Successfully shared files! Redirecting to info page...')
-                setShareData((p) => ({...p, uniqueId: response.data.uniqueId}))
-                console.log("Share data: ", shareData)
-                console.log("Response: ", response)
-                console.log("Unique ID: ", response.data.uniqueId)
-                setShared(true)
-                localStorage.setItem(SHARED_STATE, 'true')
+                alert(
+                    'Successfully shared files! Redirecting to info page...'
+                );
+
+                setShareData((p) => ({
+                    ...p,
+                    uniqueId: response.data.uniqueId,
+                }));
+
+                console.log('Share data: ', shareData);
+                console.log('Response: ', response);
+                console.log('Unique ID: ', response.data.uniqueId);
+
+                setShared(true);
+                localStorage.setItem(SHARED_STATE, 'true');
             }
         } catch (err: any) {
-            alert(err.message)
-            console.log(err)
+            alert(err.message);
+            console.log(err);
         } finally {
-            setSharing(false)
+            setSharing(false);
         }
-    }
+    };
   return (
     <div className="h-screen sm:px-6">
         <br /><br />

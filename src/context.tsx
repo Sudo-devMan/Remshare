@@ -1,12 +1,18 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
-import type { ShareFile } from "./config/types";
+import React, { createContext, useContext, useState, type ReactNode } from "react";
+import type { ReceiveData, ShareFile } from "./config/types";
 
 interface ShareFilesDataContextType {
     shareData: ShareFile,
     setShareData: React.Dispatch<React.SetStateAction<ShareFile>>
 }
 
+interface ReceiveFilesFormData {
+    receiveData: ReceiveData,
+    setReceiveData: React.Dispatch<React.SetStateAction<ReceiveData>>
+}
+
 const ShareContext = createContext<ShareFilesDataContextType | undefined>(undefined)
+const ReceiveContext = createContext<ReceiveFilesFormData | undefined>(undefined)
 
 export const ShareProvider = ({children}: {children: ReactNode}) => {
     const [shareData, setShareData] = useState<ShareFile>({
@@ -23,6 +29,29 @@ export const ShareProvider = ({children}: {children: ReactNode}) => {
             {children}
         </ShareContext.Provider>
     )
+}
+
+export const ReceiveProvider = ({children}: {children: ReactNode}) => {
+    const [receiveData, setReceiveData] = useState<ReceiveData>({
+        receiverEmail: "",
+        password: "",
+        uniqueId: ""
+    })
+
+    return (
+        <ReceiveContext.Provider value={{receiveData, setReceiveData}}>
+            {children}
+        </ReceiveContext.Provider>
+    )
+}
+
+export const useReceive = () => {
+    const c = useContext(ReceiveContext)
+    if (!c) {
+        throw new Error("useReceive must be used within ReceiveProvider")
+    }
+
+    return c;
 }
 
 export const useShare = () => {

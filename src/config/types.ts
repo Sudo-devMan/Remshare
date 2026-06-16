@@ -13,3 +13,9 @@ export type ReceiveFile = {
     receiverEmail: string,
     uniqueId: string
 }
+
+export type ReceiveData = {
+    receiverEmail: string,
+    password: string,
+    uniqueId: string
+}
