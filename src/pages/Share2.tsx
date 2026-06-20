@@ -67,7 +67,7 @@ function Share2() {
 
 
                 setShared(true);
-                localStorage.setItem(SHARED_STATE, 'true');
+                //localStorage.setItem(SHARED_STATE, 'true');
             }
         } catch (err: any) {
             alert(err.message);
