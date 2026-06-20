@@ -17,6 +17,7 @@ function Share2() {
     const [sharing, setSharing] = useState(false);
     const [shared, setShared] = useState(false);
     const [passType, setPassType] = useState<'password' | 'text'>('password');
+    const [copied, setCopied] = useState('Click here to copy the receive link ans send it to your receiver(s) to receive the files')
 
     const passToggle = () => {
     setPassType((p) => (p === 'password' ? 'text' : 'password'));
@@ -57,11 +58,13 @@ function Share2() {
                 setShareData((p) => ({
                     ...p,
                     uniqueId: response.data.uniqueId,
+                    receiveUrl: response.data.receiveUrl
                 }));
 
                 console.log('Share data: ', shareData);
                 console.log('Response: ', response);
                 console.log('Unique ID: ', response.data.uniqueId);
+
 
                 setShared(true);
                 localStorage.setItem(SHARED_STATE, 'true');
@@ -73,6 +76,24 @@ function Share2() {
             setSharing(false);
         }
     };
+
+    const copy = async(text: string | undefined) => {
+        if (!text) {
+            alert("Nothing to copy!")
+            return;
+        }
+        try {
+            navigator.clipboard.writeText(text);
+            setCopied('Copied')
+        } catch (err) {
+            alert("Failed to copy to clipboard. Check your console to see waht the problem was.");
+            console.log("Here is why copying failed: ", err)
+        } finally {
+            setTimeout(() => {
+                setCopied('Click to copy to clipboard')
+            }, 5000)
+        }
+    }
   return (
     <div className="h-screen sm:px-6">
         <br /><br />
@@ -171,6 +192,11 @@ function Share2() {
                     <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
                         <h1 className="caveat font-bold text-2xl sm:mr-3">Unique ID: </h1> 
                         <span className="break-all">{shareData.uniqueId}</span>
+                    </div>
+
+                    <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
+                        <h1 className="caveat font-bold text-2xl sm:mr-3">Receive Link: </h1> 
+                        <span onClick={() => copy(shareData.receiveUrl)} className="break-all">{copied}</span>
                     </div>
 
                     <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">

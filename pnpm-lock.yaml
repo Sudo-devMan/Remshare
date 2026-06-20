@@ -23,6 +23,9 @@ importers:
       axios:
         specifier: ^1.16.1
         version: 1.16.1
+      client-zip:
+        specifier: ^2.5.0
+        version: 2.5.0
       nprogress:
         specifier: ^0.2.0
         version: 0.2.0
@@ -607,6 +610,9 @@ packages:
 
   caniuse-lite@1.0.30001790:
     resolution: {integrity: sha512-bOoxfJPyYo+ds6W0YfptaCWbFnJYjh2Y1Eow5lRv+vI2u8ganPZqNm1JwNh0t2ELQCqIWg4B3dWEusgAmsoyOw==}
+
+  client-zip@2.5.0:
+    resolution: {integrity: sha512-ydG4nDZesbFurnNq0VVCp/yyomIBh+X/1fZPI/P24zbnG4dtC4tQAfI5uQsomigsUMeiRO2wiTPizLWQh+IAyQ==}
 
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
@@ -1759,6 +1765,8 @@ snapshots:
       function-bind: 1.1.2
 
   caniuse-lite@1.0.30001790: {}
+
+  client-zip@2.5.0: {}
 
   combined-stream@1.0.8:
     dependencies:

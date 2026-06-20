@@ -24,6 +24,7 @@ function ReceivedFiles() {
     const {shareData} = useShare()
     const [downloading, setDownloading] = useState(false)
     const [oneD, setOneD] = useState<{b: boolean, url: string}>({b: false, url: ''})
+    const [copied, setCopied] = useState('Click to copy to clipboard')
     let isFiles = shareData.files.length < 0
 
     // console.log("Received Files: ", shareData)
@@ -84,6 +85,24 @@ function ReceivedFiles() {
             setDownloading(false);
         }
     };
+
+    const copy = async(text: string | undefined) => {
+        if (!text) {
+            alert("Nothing to copy!")
+            return;
+        }
+        try {
+            navigator.clipboard.writeText(text);
+            setCopied('Copied')
+        } catch (err) {
+            alert("Failed to copy to clipboard. Check your console to see waht the problem was.");
+            console.log("Here is why copying failed: ", err)
+        } finally {
+            setTimeout(() => {
+                setCopied('Click to copy to clipboard')
+            }, 5000)
+        }
+    }
   return (
     <div className='w-full p-1'>
       <h1 className="text-center bangers-font text-7xl my-3">Received Files</h1>
@@ -92,10 +111,11 @@ function ReceivedFiles() {
             <p className='caveat text-xl sm:text-2xl'><span className="text-blue-700 font-bold">From: </span>{shareData.senderEmail}</p>
             <br /><p className='caveat text-xl sm:text-2xl'><span className="text-blue-700 font-bold">To: </span>{shareData.receiverEmail}</p>
             <br /><p className='caveat text-xl sm:text-2xl'><span className="text-blue-700 font-bold">Unique ID: </span>{shareData.uniqueId}</p>
+            <br /><p className='caveat text-xl sm:text-2xl'><span className="text-blue-700 font-bold">Receive Link: </span><button className="receive-sm" onClick={() => copy(shareData.receiveUrl)}>{copied}</button></p>
             <br /><p className='caveat text-xl sm:text-2xl'><span className="text-blue-700 font-bold">Note: </span>{shareData.note ? shareData.note : "NO NOTE PROVIDED"}</p>
             {
                 downloading ?
-                    <button disabled className="text-2xl w-full p-3 cursor-pointer transform duration-300 text-3xl bg-green-600 border-2 rounded-4xl mt-3 text-white caveat border border-black">
+                    <button disabled className="text-2xl w-full p-3 transform duration-300 text-3xl bg-green-600 border-2 rounded-4xl mt-3 text-white caveat border border-black">
                         Downloading... <FontAwesomeIcon icon={faDownload} />
                     </button>
                     :

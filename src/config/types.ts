@@ -5,7 +5,8 @@ export type ShareFile = {
     password: string,
     files: any,
     note: string,
-    uniqueId?: string
+    uniqueId?: string,
+    receiveUrl?: string
 }
 
 export type ReceiveFile = {
