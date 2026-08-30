@@ -104,7 +104,7 @@ function ReceivedFiles() {
       setCopied("Copied");
     } catch (err) {
       alert(
-        "Failed to copy to clipboard. Check your console to see waht the problem was.",
+        "Failed to copy to clipboard. Check your console to see what the problem was.",
       );
       console.log("Here is why copying failed: ", err);
     } finally {
@@ -118,16 +118,6 @@ function ReceivedFiles() {
       <h1 className="text-center bangers-font text-7xl my-3">Received Files</h1>
       <div className="sm:grid sm:grid-cols-2 px-5 items-start gap-4">
         <div className="border border-2 rounded-lg w-full sm:w-2/3 p-3 sm:m-0 mb-2">
-          <p className="caveat text-xl sm:text-2xl">
-            <span className="text-blue-700 font-bold">From: </span>
-            {shareData.senderEmail}
-          </p>
-          <br />
-          <p className="caveat text-xl sm:text-2xl">
-            <span className="text-blue-700 font-bold">To: </span>
-            {shareData.receiverEmail}
-          </p>
-          <br />
           <p className="caveat text-xl sm:text-2xl">
             <span className="text-blue-700 font-bold">Unique ID: </span>
             {shareData.uniqueId}

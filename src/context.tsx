@@ -16,8 +16,6 @@ const ReceiveContext = createContext<ReceiveFilesFormData | undefined>(undefined
 
 export const ShareProvider = ({children}: {children: ReactNode}) => {
     const [shareData, setShareData] = useState<ShareFile>({
-        receiverEmail: "",
-        senderEmail: "",
         password: "",
         note: "",
         files: [],
@@ -33,7 +31,6 @@ export const ShareProvider = ({children}: {children: ReactNode}) => {
 
 export const ReceiveProvider = ({children}: {children: ReactNode}) => {
     const [receiveData, setReceiveData] = useState<ReceiveData>({
-        receiverEmail: "",
         password: "",
         uniqueId: ""
     })

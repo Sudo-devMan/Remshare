@@ -17,14 +17,13 @@ function ReceiveForm() {
     const {receiveData, setReceiveData} = useReceive();
     const {setShareData} = useShare();
 
-    const receiverEmail= searchParams.get('receiverEmail')
     const uniqueId = searchParams.get('uniqueId')
 
     useEffect(() => {
-        if (receiverEmail && uniqueId) {
-            setReceiveData(p => ({...p, receiverEmail, uniqueId}))
+        if (uniqueId) {
+            setReceiveData(p => ({...p, uniqueId}))
         }
-    }, [receiverEmail, uniqueId])
+    }, [uniqueId])
     
     
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,7 +31,7 @@ function ReceiveForm() {
         setReceiveData(prev => ({ ...prev, [name]: value }));
     };
 
-    const allInfo = !!(receiveData.password && receiveData.receiverEmail && receiveData.uniqueId)
+    const allInfo = !!(receiveData.password && receiveData.uniqueId)
 
     const subMit = async(e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -71,20 +70,6 @@ function ReceiveForm() {
             <br />
             <div className="w-full min-h-screen sm:grid sm:grid-cols-2 flex flex-col items-center justify-center p-4 gap-6">
                 <form method="post" onSubmit={subMit} className="w-full max-w-md">
-                    {
-                        !receiverEmail && 
-                        <div className="mb-5">
-                            <p className="caveat text-xl">Receiver's email:</p>
-                            <input 
-                                type="email" 
-                                name="receiverEmail" 
-                                value={receiveData.receiverEmail}
-                                onChange={handleChange}
-                                placeholder="receiver email..." 
-                                className={`${textInputClasses} w-full`}
-                            />
-                        </div>
-                    }
                     <div className="mb-5">
                         <p className="caveat text-xl">Files password:</p>
                         <div className="relative flex items-center">
