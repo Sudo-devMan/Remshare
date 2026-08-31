@@ -31,8 +31,6 @@ function Share2() {
 
         const formData = new FormData();
 
-        formData.append('senderEmail', shareData.senderEmail);
-        formData.append('receiverEmail', shareData.receiverEmail);
         formData.append('password', shareData.password);
         formData.append('note', shareData.note);
 
@@ -106,26 +104,6 @@ function Share2() {
         <div className="w-full min-h-screen sm:grid sm:grid-cols-2 flex flex-col items-center justify-center p-4 gap-6">
             <form aria-disabled method="post" onSubmit={handleSubmit} className="w-full max-w-md">
                 <div className="mb-5">
-                    <p className="caveat text-xl">Your email:</p>
-                    <input 
-                        type="email" 
-                        name="senderEmail" 
-                        placeholder="your email..." 
-                        className={`${textInputClasses} w-full`}
-                        onChange={(e) => setShareData((p) => ({...p, senderEmail: e.target.value}))}
-                    />
-                </div>
-                <div className="mb-5">
-                    <p className="caveat text-xl">Receiver's email:</p>
-                    <input 
-                        type="email" 
-                        name="receiverEmail" 
-                        placeholder="receiver email..." 
-                        className={`${textInputClasses} w-full`}
-                        onChange={(e) => setShareData((p) => ({...p, receiverEmail: e.target.value}))}
-                    />
-                </div>
-                <div className="mb-5">
                     <p className="caveat text-xl">Files password:</p>
                     <input 
                         type="password" 
@@ -168,17 +146,7 @@ function Share2() {
                 <h1 className="text-center bangers-font text-3xl text-blue-900">Share Information</h1>
                 <p className="text-center caveat text-lg mb-6">Successfully shared <span className="font-bold">{shareData.files.length}</span> file{shareData.files.length > 1 ? 's':''} . See info below</p>
                 
-                <div className="flex flex-col gap-4 mt-2">
-                    <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
-                        <h1 className="caveat font-bold text-2xl sm:mr-3">Receiver email: </h1> 
-                        <span className="break-all">{shareData.receiverEmail}</span>
-                    </div>
-                    
-                    <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center">
-                        <h1 className="caveat font-bold text-2xl sm:mr-3">Sender email: </h1> 
-                        <span className="break-all">{shareData.senderEmail}</span>
-                    </div>
-                    
+                <div className="flex flex-col gap-4 mt-2">                    
                     <div className="bg-blue-200 p-4 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between">
                         <div className="flex flex-col sm:flex-row sm:items-center w-full">
                             <h1 className="caveat font-bold text-2xl sm:mr-3">Password: </h1> 
